@@ -44,4 +44,4 @@ def post_file():
     return Response(
         f.data,
         mimetype=f.mimetype,
-    )
+    ), 201
