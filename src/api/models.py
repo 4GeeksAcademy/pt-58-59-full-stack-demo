@@ -22,66 +22,9 @@ class User(db.Model):
         }
 
 
-todo_list_to_todo_item = db.Table(
-    "todo_list_to_todo_item",
-    db.metadata,
-    db.Column(
-        "todo_list_id",
-        db.Integer,
-        db.ForeignKey('todo_list.id')
-    ),
-    db.Column(
-        "todo_item_id",
-        db.Integer,
-        db.ForeignKey('todo_item.id')
-    ),
-)
-
-
-class TodoList(db.Model):
-    __tablename__ = "todo_list"
+class FileUpload(db.Model):
+    __tablename__ = "todo_user"
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, default="A really cool todo list!")
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("todo_user.id")
-    )
-    user = db.relationship(
-        "User",
-        uselist=False,
-        backref=db.backref(
-            "todo_lists",
-            uselist=True,
-        )
-    )
-    todo_items = db.relationship(
-        "TodoItem",
-        secondary=todo_list_to_todo_item,
-        primaryjoin=(id == todo_list_to_todo_item.c.todo_list_id),
-        uselist=True
-    )
-
-
-class TodoItem(db.Model):
-    __tablename__ = "todo_item"
-    id = db.Column(db.Integer, primary_key=True)
-    label = db.Column(db.String, default="Some new thing to do.")
-    done = db.Column(db.Boolean)
-    created = db.Column(db.DateTime, default=datetime.now)
-    updated = db.Column(db.DateTime, onupdate=datetime.now)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("todo_user.id")
-    )
-    user = db.relationship(
-        "User",
-        uselist=False,
-        backref=db.backref(
-            "todo_items",
-            uselist=True,
-        )
-    )
-    todo_lists = db.relationship(
-        "TodoList",
-        secondary=todo_list_to_todo_item,
-        primaryjoin=(id == todo_list_to_todo_item.c.todo_item_id),
-        uselist=True
-    )
+    filename = db.Column(db.String(256), unique=True, nullable=False)
+    mimetype = db.Column(db.String(256), nullable=False)
+    data = db.Column(db.LargeBinary)

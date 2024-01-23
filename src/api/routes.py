@@ -1,8 +1,8 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from flask import Flask, request, jsonify, url_for, Blueprint, Response
+from api.models import FileUpload, db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
@@ -20,3 +20,28 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@api.route("/files/<str: fname>", methods=["GET"])
+def get_file(fname):
+    f = FileUpload.query.filter_by(filename=fname).first()
+    if not f:
+        return "", 404
+    return Response(
+        f.data,
+        mimetype=f.mimetype,
+    )
+
+
+@api.route("/files", methods=["POST"])
+def get_file():
+    formdata = request.form
+    f = FileUpload(
+        filename=formdata.get("files", [])[0]["name"],
+        mimetype="image/png",
+        data=formdata.get("files", [])[0]
+    )
+    return Response(
+        f.data,
+        mimetype=f.mimetype,
+    )
