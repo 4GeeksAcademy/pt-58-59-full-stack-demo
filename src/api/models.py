@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class User(db.Model):
     __tablename__ = "todo_user"
     id = db.Column(db.Integer, primary_key=True)
@@ -19,7 +20,7 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
         }
-    
+
 
 todo_list_to_todo_item = db.Table(
     "todo_list_to_todo_item",
@@ -35,7 +36,7 @@ todo_list_to_todo_item = db.Table(
         db.ForeignKey('todo_item.id')
     ),
 )
-    
+
 
 class TodoList(db.Model):
     __tablename__ = "todo_list"
@@ -59,7 +60,6 @@ class TodoList(db.Model):
         uselist=True
     )
 
-    
 
 class TodoItem(db.Model):
     __tablename__ = "todo_item"
@@ -85,4 +85,3 @@ class TodoItem(db.Model):
         primaryjoin=(id == todo_list_to_todo_item.c.todo_item_id),
         uselist=True
     )
-
