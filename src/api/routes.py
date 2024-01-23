@@ -34,7 +34,7 @@ def get_file(fname):
 
 
 @api.route("/files", methods=["POST"])
-def get_file():
+def post_file():
     formdata = request.form
     f = FileUpload(
         filename=formdata.get("files", [])[0]["name"],
