@@ -57,8 +57,30 @@ class TodoList(db.Model):
         "TodoItem",
         secondary=todo_list_to_todo_item,
         primaryjoin=(id == todo_list_to_todo_item.c.todo_list_id),
-        uselist=True
+        # secondaryjoin=(),
+        uselist=True,
+        backref=db.backref(
+            "todo_lists",
+            uselist=True
+        )
     )
+
+    def __repr__(self):
+        return f'<TodoList {self.title}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "user": self.user.serialize(),
+            "todo_items": [{
+                "id": todo.id,
+                "label": todo.label,
+                "done": todo.done,
+                "created": todo.created,
+                "updated": todo.updated,
+            } for todo in self.todo_items],
+        }
 
 
 class TodoItem(db.Model):
@@ -79,9 +101,21 @@ class TodoItem(db.Model):
             uselist=True,
         )
     )
-    todo_lists = db.relationship(
-        "TodoList",
-        secondary=todo_list_to_todo_item,
-        primaryjoin=(id == todo_list_to_todo_item.c.todo_item_id),
-        uselist=True
-    )
+    # todo_lists: List[TodoList]
+
+    def __repr__(self):
+        return f'<TodoItem {self.label}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user": self.user.serialize(),
+            "label": self.label,
+            "done": self.done,
+            "created": self.created,
+            "updated": self.updated,
+            "todo_lists": [{
+                "id": todo_list.id,
+                "title": todo_list.title,
+            } for todo_list in self.todo_lists],
+        }
