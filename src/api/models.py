@@ -29,6 +29,9 @@ class User(db.Model):
     def password(self, password):
         self._password = generate_password_hash(password)
 
+    def check_password_hash(self, other):
+        return check_password_hash(self._password, other)
+
     def __repr__(self):
         return f'<User {self.username}>'
 

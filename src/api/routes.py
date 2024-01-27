@@ -26,12 +26,12 @@ def login():
         username=data.get("username", None)
     ).first()
 
-    early_returns = [
-        user is None,
-        getattr(user, "password", None) != data.get("password", ""),
-    ]
-
-    if any(early_returns):
+    if user is None:
+        return jsonify(
+            message="Invalid credentials",
+        ), 400
+    
+    if not user.check_password_hash(data.get("password", "")):
         return jsonify(
             message="Invalid credentials",
         ), 400
