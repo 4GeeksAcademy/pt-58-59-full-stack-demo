@@ -2,6 +2,10 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
+from flask_jwt_extended import (
+    create_access_token, get_jwt_identity, jwt_required,
+    current_user
+)
 from api.models import (
     db, User, TodoList, TodoItem
 )
@@ -13,8 +17,41 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
-# User views
+# region: Auth
 
+@api.route("/token", methods=["POST"])
+def login():
+    data = request.json
+    user = User.query.filter_by(
+        username=data.get("username", None)
+    ).first()
+
+    early_returns = [
+        user is None,
+        getattr(user, "password", None) != data.get("password", ""),
+    ]
+
+    if any(early_returns):
+        return jsonify(
+            message="Invalid credentials",
+        ), 400
+    
+    return jsonify(
+        access_token=create_access_token(
+            identity=user.username
+        ),
+        token_type="bearer",
+    )
+
+
+@api.route("/authtest", methods=["GET"])
+@jwt_required()
+def auth_test():
+    return jsonify(current_user.serialize())
+
+# endregion
+
+# region: User views
 
 @api.route("/user", methods=["GET"])
 def read_users():
@@ -29,8 +66,9 @@ def read_user(id: int):
     user = User.query.filter_by(id=id).first()
     return jsonify(user.serialize())
 
+# endregion
 
-# TodoList
+# region: TodoList
 
 @api.route("/todolist", methods=["POST"])
 def create_todo_lists():
@@ -85,8 +123,9 @@ def delete_todo_list(id: int):
     db.session.commit()
     return "", 204
 
+# endregion
 
-# TodoItem
+# region: TodoItem
 
 @api.route("/todoitem", methods=["POST"])
 def create_todo_item():
@@ -115,3 +154,5 @@ def update_todo_item():
 @api.route("/todoitem", methods=["DELETE"])
 def delete_todo_item():
     pass
+
+# endregion
