@@ -66,6 +66,24 @@ def read_user(id: int):
     user = User.query.filter_by(id=id).first()
     return jsonify(user.serialize())
 
+
+@api.route("/user", methods=["POST"])
+def create_user():
+    """
+    BODY:
+    {
+        "username": "string",
+        "password": "string"
+    }
+    """
+    data = request.json
+    user = User(**data)
+    db.session.add(user)
+    db.session.commit()
+    db.session.refresh(user)
+    return jsonify(user.serialize()), 201
+
+
 # endregion
 
 # region: TodoList
