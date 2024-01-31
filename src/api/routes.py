@@ -1,11 +1,16 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
+import os
+import re
+
 from flask import Flask, request, jsonify, url_for, Blueprint
 from flask_jwt_extended import (
     create_access_token, get_jwt_identity, jwt_required,
     current_user
 )
+import requests
+
 from api.models import (
     db, User, TodoList, TodoItem
 )
@@ -174,3 +179,28 @@ def delete_todo_item():
     pass
 
 # endregion
+
+# region: Spoonacular
+
+@api.route("/recipes/search", methods=["GET"])
+def search_recipes():
+    params = dict(request.args)
+    params["apiKey"] = os.getenv("SPOON_API_KEY")
+    url = "https://api.spoonacular.com/recipes/complexSearch"
+    resp = requests.get(url, params=params)
+    return jsonify(resp.json()), resp.status_code
+
+
+@api.route("/recipes/parse", methods=["POST"])
+def parse_recipes():
+    params = dict(request.args)
+    params["apiKey"] = os.getenv("SPOON_API_KEY")
+    url = "https://api.spoonacular.com/recipes/analyzeInstructions"
+    resp = requests.post(url, params=params)
+    return jsonify(resp.json()), resp.status_code
+
+# endregion
+
+"""
+Cook short pasta and drain off the water, leaving 1/4 cup of reserved pasta water.  Put the pasta back in the pot, melt in 1 tbs of butter, add in 1.5 tsp of mustard powder, 1/2 tsp of ground black pepper, a pinch of salt, your reserved pasta water, 1/4 c grated cheese, stir until the cheese is melted and incorporated.  Add milk as needed to get the right consistency.
+"""
